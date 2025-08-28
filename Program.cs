@@ -1,5 +1,6 @@
 using MQTTnet;
 using webapi;
+using webapi.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,10 @@ builder.Services.AddSingleton(sp =>
 });
 builder.Services.AddHostedService<MqttSubscribe>();
 
+builder.Services.AddSingleton<DataContext>();
+builder.Services.AddSingleton<IDeviceRepository, DeviceRepository>();
+builder.Services.AddSingleton<ILogRepository, LogRepository>();
+
 var app = builder.Build();
 app.MapControllers();
 
@@ -22,6 +27,13 @@ app.MapControllers();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+
+// create database and tables
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await context.Init();
 }
 
 app.UsePathBase("/api");

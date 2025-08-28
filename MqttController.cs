@@ -22,12 +22,12 @@ public class MqttController(IMqttClient mqttClient) : ControllerBase
 
         var appMessage = new MqttApplicationMessageBuilder()
             .WithTopic(request.topic)
-            .WithPayload(JsonSerializer.SerializeToUtf8Bytes(request.message))
+            .WithPayload(JsonSerializer.SerializeToUtf8Bytes(request.payload))
             .Build();
 
         await mqttClient.PublishAsync(appMessage);        
-        return Ok("Message published");
+        return Ok("Payload published");
     }
 }
 
-public record PublishRequest(string topic, dynamic message);
+public record PublishRequest(string topic, dynamic payload);

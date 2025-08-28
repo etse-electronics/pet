@@ -2,8 +2,9 @@ namespace webapi;
 
 using System.Text;
 using MQTTnet;
+using webapi.Repository;
 
-public class MqttSubscribe(IMqttClient mqttClient) : BackgroundService
+public class MqttSubscribe(IMqttClient mqttClient, IDeviceRepository deviceRepository, ILogRepository logRepository) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -14,7 +15,7 @@ public class MqttSubscribe(IMqttClient mqttClient) : BackgroundService
             .Build();
 
         mqttClient.ConnectedAsync += async e =>
-        {   
+        {
             Console.WriteLine("CONNECTED to MQTT broker");
             await mqttClient.SubscribeAsync("devices/#", cancellationToken: stoppingToken);
             Console.WriteLine("SUBSCRIBED to devices/#");
@@ -23,7 +24,7 @@ public class MqttSubscribe(IMqttClient mqttClient) : BackgroundService
         mqttClient.DisconnectedAsync += async e =>
         {
             Console.WriteLine("DISCONNECTED from broker");
-            
+
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
             try
@@ -36,15 +37,16 @@ public class MqttSubscribe(IMqttClient mqttClient) : BackgroundService
             }
         };
 
-        mqttClient.ApplicationMessageReceivedAsync += e =>
+        mqttClient.ApplicationMessageReceivedAsync += async e =>
         {
             var topic = e.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
-            Console.WriteLine($"Received message on topic {topic}: {payload}");
+            Console.WriteLine($"Received payload on topic {topic}: {payload}");
 
-            
-            return Task.CompletedTask;
+            var deviceId = topic.Split("/")[1];
+            await deviceRepository.Seen(deviceId);
+            await logRepository.AddLog(deviceId, topic, payload);
         };
 
         await mqttClient.ConnectAsync(options, stoppingToken);
