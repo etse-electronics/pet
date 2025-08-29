@@ -2,8 +2,11 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
 	"name": "C# (.NET)",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "webapi",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+	// "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -16,7 +19,7 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5000, 5001],
+	// "forwardPorts": [5112, 1883],
 	// "portsAttributes": {
 	//		"5001": {
 	//			"protocol": "https"
@@ -24,7 +27,7 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet restore && sudo apt update && sudo apt install sqlite3"
+	"postCreateCommand": "dotnet restore"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
