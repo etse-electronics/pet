@@ -1,6 +1,7 @@
 using MQTTnet;
 using webapi;
 using webapi.Repository;
+using webapi.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
-builder.Services.AddSingleton(sp =>
+builder.Services.AddSingleton(services =>
 {
     var factory = new MqttClientFactory();
     return factory.CreateMqttClient();
@@ -20,8 +21,15 @@ builder.Services.AddSingleton<DataContext>();
 builder.Services.AddSingleton<IDeviceRepository, DeviceRepository>();
 builder.Services.AddSingleton<ILogRepository, LogRepository>();
 
+// WebSockets
+builder.Services.AddSingleton<DeviceStateService>();
+builder.Services.AddHostedService<DeviceBackgroundService>();
+
 var app = builder.Build();
 app.MapControllers();
+
+app.UseWebSockets();
+app.UseMiddleware<DeviceWebSocketMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -44,7 +52,7 @@ app.MapGet("/", () =>
 });
 
 app.MapGet("/ping", () =>
-{    
+{
     return "pong";
 })
 .WithName("Ping");

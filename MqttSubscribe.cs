@@ -4,13 +4,16 @@ using System.Text;
 using MQTTnet;
 using webapi.Repository;
 
-public class MqttSubscribe(IMqttClient mqttClient, IDeviceRepository deviceRepository, ILogRepository logRepository) : BackgroundService
+public class MqttSubscribe(IMqttClient mqttClient, IDeviceRepository deviceRepository, ILogRepository logRepository, IConfiguration configuration) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var server = configuration.GetSection("MqttServer:Server").Value;  // tunnel.etse-tech.com
+        var port = Convert.ToInt32(configuration.GetSection("MqttServer:Port").Value); // 1883
+        Console.WriteLine("Subscribing to MQTT at {0} on port {1}", server, port);
         var options = new MqttClientOptionsBuilder()
-            .WithClientId("webapi-client")
-            .WithTcpServer("tunnel.etse-tech.com", 1883)
+            .WithClientId($"webapi-client-{Guid.NewGuid()}")
+            .WithTcpServer(server, port)
             .WithCleanSession()
             .Build();
 
@@ -23,7 +26,7 @@ public class MqttSubscribe(IMqttClient mqttClient, IDeviceRepository deviceRepos
 
         mqttClient.DisconnectedAsync += async e =>
         {
-            Console.WriteLine("DISCONNECTED from broker");
+            Console.WriteLine("DISCONNECTED from broker {0}, {1}", e.Reason, e.ReasonString);
 
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 

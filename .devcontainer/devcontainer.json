@@ -3,7 +3,14 @@
 {
 	"name": "C# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm"
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"alexcvzz.vscode-sqlite"
+			]
+		}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -17,7 +24,7 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
+	"postCreateCommand": "dotnet restore && sudo apt update && sudo apt install sqlite3"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
