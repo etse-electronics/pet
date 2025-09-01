@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using webapi.Repository.Entities;
 
@@ -5,19 +6,20 @@ namespace webapi.Repository;
 
 public interface IDeviceRepository
 {
-    Task<Device> Seen(string id);
+    Task<Device> Seen(string id, int state);
     Task<Device?> GetDevice(string id);
     Task<IEnumerable<Device>> GetDevices();
+    Task Reset();
 }
 
 public class DeviceRepository(DataContext context) : IDeviceRepository
 {
-    public async Task<Device> Seen(string id)
+    public async Task<Device> Seen(string id, int state)
     {
         using var connection = context.CreateConnection();
         var sql = """
-            INSERT INTO Devices (Id, LastSeen)
-            VALUES (@Id, @LastSeen)
+            INSERT INTO Devices (Id, State, LastSeen)
+            VALUES (@Id, @State, @LastSeen)
             ON CONFLICT(Id) DO UPDATE 
                 SET LastSeen = excluded.LastSeen
             RETURNING *;
@@ -25,7 +27,7 @@ public class DeviceRepository(DataContext context) : IDeviceRepository
 
         return await connection.QuerySingleAsync<Device>(
             sql,
-            new { Id = id, LastSeen = DateTime.UtcNow }
+            new { Id = id, State = state, LastSeen = DateTime.UtcNow }
         );
     }
 
@@ -41,5 +43,15 @@ public class DeviceRepository(DataContext context) : IDeviceRepository
         using var connection = context.CreateConnection();
         var sql = "SELECT * FROM Devices";
         return await connection.QueryAsync<Device>(sql);
+    }
+
+    public async Task Reset()
+    {
+        using var connection = context.CreateConnection();
+        var sql = """
+            DELETE FROM Logs;
+            DELETE FROM Devices;
+        """;
+        await connection.ExecuteAsync(sql);
     }
 }

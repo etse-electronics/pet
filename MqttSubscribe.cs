@@ -48,7 +48,7 @@ public class MqttSubscribe(IMqttClient mqttClient, IDeviceRepository deviceRepos
             Console.WriteLine($"Received payload on topic {topic}: {payload}");
 
             var deviceId = topic.Split("/")[1];
-            await deviceRepository.Seen(deviceId);
+            await deviceRepository.Seen(deviceId, 0);
             await logRepository.AddLog(deviceId, topic, payload);
         };
 

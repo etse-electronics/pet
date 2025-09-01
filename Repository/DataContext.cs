@@ -21,6 +21,7 @@ public class DataContext(IConfiguration configuration)
             var sql = """
             CREATE TABLE IF NOT EXISTS Devices (
                 Id TEXT NOT NULL PRIMARY KEY,
+                State INTEGER NOT NULL DEFAULT 0,
                 LastSeen DATETIME
             );
 

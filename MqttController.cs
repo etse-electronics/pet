@@ -11,7 +11,7 @@ public class MqttController(IMqttClient mqttClient) : ControllerBase
     [HttpGet()]
     public string Get()
     {
-        return "mqtt is ready";
+        return "mqttcontroller is ready";
     }
 
     [HttpPost("publish")]
