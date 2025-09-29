@@ -1,9 +1,7 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using MQTTnet;
 using webapi.Repository;
 
-namespace webapi;
+namespace webapi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -20,5 +18,12 @@ public class DevicesController(IDeviceRepository deviceRepository) : ControllerB
     {
         await deviceRepository.Reset();
         return Ok();
+    }
+
+    [HttpGet("list")]
+    public async Task<IActionResult> GetList()
+    {
+        var devices = await deviceRepository.GetDevices();
+        return Ok(devices);
     }
 }

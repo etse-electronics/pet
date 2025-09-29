@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using MQTTnet;
 
-namespace webapi;
+namespace webapi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
